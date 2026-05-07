@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farmer Dashboard – FarmConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--gd:#1B5E20;--gm:#2E7D32;--gl:#4CAF50;--white:#fff;--gray:#F3F4F6;--gray2:#E5E7EB;--dark:#1a1a1a;--muted:#6B7280;--sh:0 4px 24px rgba(0,0,0,.07);--shh:0 8px 40px rgba(27,94,32,.15);}
+    *{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+    body{font-family:'DM Sans',sans-serif;color:var(--dark);background:#f9faf5;overflow-x:hidden;}h1,h2,h3{font-family:'Playfair Display',serif;}
+    
+    .container{max-width:1200px;margin:0 auto;padding:0 20px;}
+    
+    header{background:var(--gd);color:white;padding:20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;box-shadow:var(--shh);}
+    .header-left{display:flex;align-items:center;gap:12px;}
+    .logo{font-size:1.3rem;font-weight:700;text-decoration:none;color:white;}
+    .header-right{display:flex;align-items:center;gap:14px;}
+    .notif-bell{background:rgba(255,255,255,.2);border:none;border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;color:white;transition:all .2s;position:relative;}
+    .notif-bell:hover{background:rgba(255,255,255,.3);}
+    .notif-badge{position:absolute;top:-4px;right:-4px;background:#ef4444;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;color:white;font-weight:700;}
+    .notif-badge.hidden{display:none;}
+    .user-menu a{color:white;text-decoration:none;padding:6px 12px;border-radius:6px;transition:all .2s;font-size:.85rem;font-weight:600;}
+    .user-menu a:hover{background:rgba(255,255,255,.2);}
+    
+    .dash-grid{display:grid;grid-template-columns:240px 1fr;gap:20px;padding:20px 0;min-height:calc(100vh - 80px);}
+    
+    .sidebar{background:white;border-radius:14px;padding:18px;box-shadow:var(--sh);}
+    .sidebar-title{font-size:.88rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:12px;letter-spacing:.05em;}
+    .sidebar-item{display:block;padding:10px 12px;margin-bottom:6px;border-radius:8px;text-decoration:none;color:var(--dark);font-size:.87rem;font-weight:500;transition:all .2s;cursor:pointer;border:none;background:none;width:100%;text-align:left;}
+    .sidebar-item:hover, .sidebar-item.active{background:#e8f5e9;color:var(--gd);}
+    
+    .content{background:white;border-radius:14px;padding:30px;box-shadow:var(--sh);}
+    .content-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;padding-bottom:18px;border-bottom:2px solid var(--gray2);}
+    .content-hd h2{font-size:1.6rem;}
+    .content-hd .btn{padding:10px 18px;background:var(--gd);color:white;border:none;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;}
+    .content-hd .btn:hover{background:var(--gm);}
+    
+    .section{display:none;margin-bottom:30px;}
+    .section.active{display:block;}
+    
+    .form-grid{display:grid;gap:14px;margin-bottom:22px;}
+    .form-group label{display:block;font-size:.85rem;font-weight:600;margin-bottom:5px;color:var(--dark);}
+    .form-group input, .form-group textarea, .form-group select{width:100%;padding:10px 12px;border:1.5px solid var(--gray2);border-radius:8px;font-size:.85rem;font-family:'DM Sans',sans-serif;background:white;}
+    .form-group textarea{resize:vertical;min-height:100px;}
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus{outline:none;border-color:var(--gd);}
+    
+    .btn-save{padding:12px 24px;background:var(--gd);color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;transition:all .2s;}
+    .btn-save:hover{background:var(--gm);}
+    .btn-save:disabled{opacity:.6;cursor:not-allowed;}
+    
+    .upload-box{border:2px dashed var(--gray2);border-radius:10px;padding:30px;text-align:center;cursor:pointer;transition:all .2s;}
+    .upload-box:hover{border-color:var(--gd);background:#f0f7f0;}
+    .upload-box.drag-over{border-color:var(--gd);background:#e8f5e9;}
+    .upload-box-txt{font-size:.87rem;color:var(--muted);line-height:1.6;}
+    .upload-box-txt strong{color:var(--gd);display:block;}
+    
+    .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin:20px 0;}
+    .gal-item{position:relative;border-radius:10px;overflow:hidden;height:140px;background:var(--gray);}
+    .gal-item img{width:100%;height:100%;object-fit:cover;}
+    .gal-del{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);border:none;border-radius:6px;width:28px;height:28px;color:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;transition:all .2s;}
+    .gal-del:hover{background:#c62828;}
+    
+    .orders-table{width:100%;border-collapse:collapse;margin-top:18px;}
+    .orders-table th{background:var(--gray);padding:12px;text-align:left;font-weight:600;font-size:.85rem;border-bottom:2px solid var(--gray2);}
+    .orders-table td{padding:12px;border-bottom:1px solid var(--gray2);font-size:.85rem;}
+    .orders-table tr:hover{background:#f9faf5;}
+    .status-badge{display:inline-block;padding:4px 9px;border-radius:6px;font-size:.73rem;font-weight:600;}
+    .status-pending{background:#fef3c7;color:#d97706;}
+    .status-processing{background:#dbeafe;color:#2563eb;}
+    .status-completed{background:#d1fae5;color:#059669;}
+    .status-cancelled{background:#fee2e2;color:#dc2626;}
+    
+    .notif-list{display:flex;flex-direction:column;gap:12px;max-height:350px;overflow-y:auto;}
+    .notif-item{background:var(--gray);padding:12px 14px;border-radius:10px;border-left:4px solid var(--gd);font-size:.85rem;}
+    .notif-msg{margin-bottom:4px;font-weight:500;}
+    .notif-time{font-size:.75rem;color:var(--muted);}
+    .notif-empty{padding:30px;text-align:center;color:var(--muted);font-size:.87rem;}
+    
+    .cert-item{background:var(--gray);padding:16px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+    .cert-name{font-weight:600;font-size:.9rem;}
+    .cert-status{font-size:.75rem;background:#d1fae5;color:#059669;padding:3px 8px;border-radius:6px;font-weight:600;}
+    
+    @media(max-width:768px){.dash-grid{grid-template-columns:1fr}.sidebar{flex-direction:row;overflow-x:auto;width:100%}.sidebar-item{white-space:nowrap}}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <a href="index.html" class="logo">🌿 FarmConnect</a>
+  </div>
+  <div class="header-right">
+    <button class="notif-bell" id="notifBell" onclick="toggleNotifications()">🔔<span class="notif-badge" id="notifBadge"></span></button>
+    <div class="user-menu">
+      <span id="userName">Farmer</span> |
+      <a href="#" onclick="doLogout();return false">Logout</a>
+    </div>
+  </div>
+</header>
+
+<div class="container dash-grid">
+  <div class="sidebar">
+    <div class="sidebar-title">Menu</div>
+    <button class="sidebar-item active" onclick="showSection('profile')">👤 Profile</button>
+    <button class="sidebar-item" onclick="showSection('gallery')">🖼️ Gallery</button>
+    <button class="sidebar-item" onclick="showSection('practices')">🌱 Practices</button>
+    <button class="sidebar-item" onclick="showSection('certs')">✓ Certificates</button>
+    <button class="sidebar-item" onclick="showSection('orders')">📦 Orders</button>
+  </div>
+
+  <div class="content">
+    <!-- PROFILE SECTION -->
+    <div id="profile" class="section active">
+      <div class="content-hd"><h2>Update Farm Profile</h2></div>
+      <div class="form-grid">
+        <div class="form-group"><label>Farm Name</label><input type="text" id="farmName" placeholder="Your Farm Name"></div>
+        <div class="form-group"><label>Location / Village</label><input type="text" id="farmLocation" placeholder="City/Village, State"></div>
+        <div class="form-group"><label>Year Established</label><input type="number" id="yearEst" placeholder="2015"></div>
+        <div class="form-group"><label>About Your Farm</label><textarea id="farmBio" placeholder="Tell customers about your farm, certifications, and values..."></textarea></div>
+      </div>
+      <button class="btn-save" id="saveProfileBtn" onclick="saveProfile()">Save Profile</button>
+    </div>
+
+    <!-- GALLERY SECTION -->
+    <div id="gallery" class="section">
+      <div class="content-hd"><h2>Farm Photo Gallery</h2><button class="btn" onclick="document.getElementById('galUpload').click()">+ Add Photos</button></div>
+      <div class="upload-box" id="uploadBox" ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" onclick="document.getElementById('galUpload').click()">
+        <input type="file" id="galUpload" multiple accept="image/*" style="display:none" onchange="handleFileSelect(event)">
+        <div class="upload-box-txt"><strong>Drop photos here</strong> or click to browse<br><span style="font-size:.78rem;color:var(--muted)">JPG, PNG up to 5MB each</span></div>
+      </div>
+      <div class="gallery-grid" id="galleryGrid"></div>
+    </div>
+
+    <!-- PRACTICES SECTION -->
+    <div id="practices" class="section">
+      <div class="content-hd"><h2>Log Farm Practices</h2></div>
+      <div class="form-grid">
+        <div class="form-group"><label>Product / Crop</label><input type="text" id="practiceProduct" placeholder="e.g., Tomatoes"></div>
+        <div class="form-group"><label>Fertiliser Used</label><input type="text" id="practiceFertiliser" placeholder="e.g., Organic Compost, NPK 10-10-10"></div>
+        <div class="form-group"><label>Irrigation Method</label><input type="text" id="practiceIrrigation" placeholder="e.g., Drip irrigation, Rain-fed"></div>
+        <div class="form-group"><label>Pesticides / Treatment</label><input type="text" id="practicePesticides" placeholder="e.g., Neem oil, No chemicals"></div>
+      </div>
+      <button class="btn-save" onclick="savePractice()">Log Practice</button>
+      <div id="practicesList" style="margin-top:30px;"></div>
+    </div>
+
+    <!-- CERTIFICATIONS SECTION -->
+    <div id="certs" class="section">
+      <div class="content-hd"><h2>Certifications</h2><button class="btn" onclick="document.getElementById('certUpload').click()">+ Upload Certificate</button></div>
+      <input type="file" id="certUpload" style="display:none" accept=".pdf,.png,.jpg" onchange="handleCertUpload(event)">
+      <div class="form-grid" style="margin-bottom:24px;display:none;gap:10px" id="certForm">
+        <div class="form-group"><label>Certificate Name</label><input type="text" id="certName" placeholder="e.g., Organic Certification"></div>
+        <div class="form-group"><label>Issued By</label><input type="text" id="certIssuer" placeholder="e.g., FSSAI, APEDA"></div>
+        <button class="btn-save" onclick="uploadCertificate()">Upload</button>
+      </div>
+      <div id="certsList"></div>
+    </div>
+
+    <!-- ORDERS SECTION -->
+    <div id="orders" class="section">
+      <div class="content-hd"><h2>Your Orders</h2></div>
+      <table class="orders-table">
+        <thead>
+          <tr><th>Order ID</th><th>Customer</th><th>Products</th><th>Status</th><th>Action</th></tr>
+        </thead>
+        <tbody id="ordersBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS MODAL -->
+<div id="notifPanel" style="position:fixed;right:-350px;top:68px;width:320px;max-height:calc(100vh-68px);background:white;box-shadow:var(--shh);transition:right .3s;z-index:999;border-radius:0 0 0 12px;overflow-y:auto;">
+  <div style="padding:16px;border-bottom:1px solid var(--gray2);display:flex;justify-content:space-between;align-items:center;">
+    <strong>Notifications</strong>
+    <button onclick="toggleNotifications()" style="border:none;background:none;cursor:pointer;font-size:1.2rem;">✕</button>
+  </div>
+  <div id="notifList" class="notif-list" style="padding:12px;"></div>
+</div>
+
+<script src="assets/api.js"></script>
+<script>
+var currentUser = null;
+
+window.addEventListener('DOMContentLoaded', async function () {
+    var user = await checkSession('farmer');
+    if (!user) return;
+
+    currentUser = user;
+    document.getElementById('userName').textContent = user.name;
+    loadProfile();
+    loadOrders();
+    loadNotifications();
+    setInterval(loadNotifications, 30000);
+});
+
+function showSection(sectionId) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    document.getElementById(sectionId).classList.add('active');
+    event.target.classList.add('active');
+}
+
+async function loadProfile() {
+    var res = await API.getFarmerProfile(currentUser.id);
+    if (res.success && res.data.profile) {
+        var p = res.data.profile;
+        document.getElementById('farmName').value = p.name || '';
+        document.getElementById('farmLocation').value = p.location || '';
+        document.getElementById('yearEst').value = p.established_year || new Date().getFullYear();
+        document.getElementById('farmBio').value = p.bio || '';
+    }
+    loadGallery();
+    loadPractices();
+    loadCertifications();
+}
+
+async function saveProfile() {
+    var data = {
+        name: document.getElementById('farmName').value,
+        location: document.getElementById('farmLocation').value,
+        established_year: document.getElementById('yearEst').value,
+        bio: document.getElementById('farmBio').value
+    };
+    var res = await API.updateFarmerProfile(data);
+    showToast(res.message, res.success ? 'success' : 'error');
+}
+
+async function loadGallery() {
+    var res = await API.getFarmerProfile(currentUser.id);
+    if (res.success && res.data.gallery) {
+        document.getElementById('galleryGrid').innerHTML = res.data.gallery.map(img =>
+            '<div class="gal-item"><img src="' + img.image_url + '" alt="Farm photo"><button class="gal-del" onclick="deleteGalleryImg(' + img.id + ')">✕</button></div>'
+        ).join('');
+    }
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+    document.getElementById('uploadBox').classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+    e.preventDefault();
+    document.getElementById('uploadBox').classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('uploadBox').classList.remove('drag-over');
+    handleFileSelect({ target: { files: e.dataTransfer.files } });
+}
+
+async function handleFileSelect(e) {
+    var files = e.target.files;
+    if (!files.length) return;
+
+    for (var i = 0; i < files.length; i++) {
+        var formData = new FormData();
+        formData.append('file', files[i]);
+        var res = await API.uploadGalleryImages(formData);
+        showToast(res.message, res.success ? 'success' : 'error');
+    }
+    loadGallery();
+    document.getElementById('galUpload').value = '';
+}
+
+async function deleteGalleryImg(imgId) {
+    if (!confirm('Delete this photo?')) return;
+    var res = await API.deleteGalleryImage(imgId);
+    showToast(res.message, res.success ? 'success' : 'error');
+    loadGallery();
+}
+
+async function savePractice() {
+    var data = {
+        product_name: document.getElementById('practiceProduct').value,
+        fertilizer_used: document.getElementById('practiceFertiliser').value,
+        irrigation_method: document.getElementById('practiceIrrigation').value,
+        pesticide_info: document.getElementById('practicePesticides').value
+    };
+    var res = await API.addFarmPractice(data);
+    showToast(res.message, res.success ? 'success' : 'error');
+    if (res.success) {
+        document.querySelectorAll('#practices input').forEach(i => i.value = '');
+        loadPractices();
+    }
+}
+
+async function loadPractices() {
+    var res = await API.getFarmerProfile(currentUser.id);
+    if (res.success && res.data.practices) {
+        document.getElementById('practicesList').innerHTML = res.data.practices.map(p =>
+            '<div class="cert-item"><div><strong>' + p.product_name + '</strong><br><small style="color:var(--muted)">' + p.fertilizer_used + ' | ' + p.irrigation_method + '</small></div></div>'
+        ).join('');
+    }
+}
+
+async function loadCertifications() {
+    var res = await API.getFarmerProfile(currentUser.id);
+    if (res.success && res.data.certifications) {
+        document.getElementById('certsList').innerHTML = res.data.certifications.map(c =>
+            '<div class="cert-item"><div><div class="cert-name">' + c.name + '</div><span style="font-size:.75rem;color:var(--muted)">' + (c.issued_by || 'FarmConnect') + '</span></div><span class="cert-status">✓ VERIFIED</span></div>'
+        ).join('');
+    }
+}
+
+function handleCertUpload(e) {
+    if (e.target.files.length) {
+        document.getElementById('certForm').style.display = 'grid';
+    }
+}
+
+async function uploadCertificate() {
+    var file = document.getElementById('certUpload').files[0];
+    if (!file) return;
+
+    var formData = new FormData();
+    formData.append('file', file);
+    formData.append('name', document.getElementById('certName').value);
+    formData.append('issued_by', document.getElementById('certIssuer').value);
+
+    var res = await API.addCertificate(formData);
+    showToast(res.message, res.success ? 'success' : 'error');
+    if (res.success) {
+        document.getElementById('certForm').style.display = 'none';
+        document.getElementById('certUpload').value = '';
+        loadCertifications();
+    }
+}
+
+async function loadOrders() {
+    var res = await API.getOrders();
+    if (!res.success || !res.orders || !res.orders.length) {
+        document.getElementById('ordersBody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);">No orders yet</td></tr>';
+        return;
+    }
+
+    document.getElementById('ordersBody').innerHTML = res.orders.map(o =>
+        '<tr><td>#' + o.id + '</td><td>' + (o.customer_name || 'Guest') + '</td><td>' + (o.items_summary || 'N/A') + '</td>' +
+        '<td><span class="status-badge status-' + o.status + '">' + o.status + '</span></td>' +
+        '<td>' + (o.status === 'pending' ? '<button onclick="acceptOrRejectOrder(' + o.id + ', \'accept\')" style="padding:4px 9px;background:#059669;color:white;border:none;border-radius:4px;cursor:pointer;font-size:.75rem;font-weight:600;margin-right:4px;">Accept</button><button onclick="acceptOrRejectOrder(' + o.id + ', \'reject\')" style="padding:4px 9px;background:#dc2626;color:white;border:none;border-radius:4px;cursor:pointer;font-size:.75rem;font-weight:600;">Reject</button>' : 'N/A') + '</td></tr>'
+    ).join('');
+}
+
+async function acceptOrRejectOrder(orderId, action) {
+    var res = await API.acceptOrder(orderId, action);
+    showToast(res.message || (action === 'accept' ? 'Order accepted' : 'Order rejected'), res.success ? 'success' : 'error');
+    loadOrders();
+}
+
+async function loadNotifications() {
+    var res = await API.getNotifications();
+    if (res.success && res.unread_count) {
+        document.getElementById('notifBadge').textContent = res.unread_count;
+        document.getElementById('notifBadge').classList.remove('hidden');
+    } else {
+        document.getElementById('notifBadge').classList.add('hidden');
+    }
+
+    if (res.success && res.notifications && res.notifications.length) {
+        document.getElementById('notifList').innerHTML = res.notifications.map(n =>
+            '<div class="notif-item"><div class="notif-msg">' + n.message + '</div><div class="notif-time">' + formatDate(n.created_at) + '</div></div>'
+        ).join('');
+    } else {
+        document.getElementById('notifList').innerHTML = '<div class="notif-empty">No new notifications</div>';
+    }
+}
+
+function toggleNotifications() {
+    var panel = document.getElementById('notifPanel');
+    if (panel.style.right === '0px') {
+        panel.style.right = '-350px';
+    } else {
+        panel.style.right = '0';
+        if (document.getElementById('notifList').children.length > 0) {
+            API.markAllNotificationsRead();
+            loadNotifications();
+        }
+    }
+}
+
+async function doLogout() {
+    await API.logout();
+    window.location.href = 'index.html';
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard – FarmConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--gd:#1B5E20;--gm:#2E7D32;--gl:#4CAF50;--white:#fff;--gray:#F3F4F6;--gray2:#E5E7EB;--dark:#1a1a1a;--muted:#6B7280;--sh:0 4px 24px rgba(0,0,0,.07);--shh:0 8px 40px rgba(27,94,32,.15);}
+    *{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+    body{font-family:'DM Sans',sans-serif;color:var(--dark);background:#f9faf5;overflow-x:hidden;}h1,h2,h3{font-family:'Playfair Display',serif;}
+    
+    .container{max-width:1200px;margin:0 auto;padding:0 20px;}
+    
+    header{background:var(--gd);color:white;padding:20px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;box-shadow:var(--shh);}
+    .header-left{display:flex;align-items:center;gap:12px;}
+    .logo{font-size:1.3rem;font-weight:700;text-decoration:none;color:white;}
+    .header-right{display:flex;align-items:center;gap:14px;}
+    .user-menu a{color:white;text-decoration:none;padding:6px 12px;border-radius:6px;transition:all .2s;font-size:.85rem;font-weight:600;}
+    .user-menu a:hover{background:rgba(255,255,255,.2);}
+    
+    .dash-grid{display:grid;grid-template-columns:240px 1fr;gap:20px;padding:20px 0;min-height:calc(100vh - 80px);}
+    
+    .sidebar{background:white;border-radius:14px;padding:18px;box-shadow:var(--sh);}
+    .sidebar-title{font-size:.88rem;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:12px;letter-spacing:.05em;}
+    .sidebar-item{display:block;padding:10px 12px;margin-bottom:6px;border-radius:8px;text-decoration:none;color:var(--dark);font-size:.87rem;font-weight:500;transition:all .2s;cursor:pointer;border:none;background:none;width:100%;text-align:left;}
+    .sidebar-item:hover, .sidebar-item.active{background:#e8f5e9;color:var(--gd);}
+    
+    .content{background:white;border-radius:14px;padding:30px;box-shadow:var(--sh);}
+    .content-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;padding-bottom:18px;border-bottom:2px solid var(--gray2);}
+    .content-hd h2{font-size:1.6rem;}
+    
+    .section{display:none;margin-bottom:30px;}
+    .section.active{display:block;}
+    
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px;}
+    .stat-card{background:linear-gradient(135deg,#e8f5e9,#c8e6c9);border-radius:12px;padding:20px;box-shadow:var(--sh);}
+    .stat-label{font-size:.85rem;color:var(--muted);font-weight:600;}
+    .stat-value{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--gd);margin:8px 0;}
+    
+    .table-card{width:100%;border-collapse:collapse;margin-top:18px;background:white;}
+    .table-card th{background:var(--gray);padding:12px;text-align:left;font-weight:600;font-size:.85rem;border-bottom:2px solid var(--gray2);}
+    .table-card td{padding:12px;border-bottom:1px solid var(--gray2);font-size:.85rem;}
+    .table-card tr:hover{background:var(--gray);}
+    
+    .status-badge{display:inline-block;padding:4px 10px;border-radius:6px;font-size:.73rem;font-weight:600;}
+    .status-pending{background:#fef3c7;color:#d97706;}
+    .status-verified{background:#d1fae5;color:#059669;}
+    .status-rejected{background:#fee2e2;color:#dc2626;}
+    
+    .cert-preview{width:120px;height:120px;border-radius:8px;object-fit:contain;background:var(--gray);padding:4px;}
+    
+    .action-btns{display:flex;gap:8px;}
+    .btn-approve, .btn-reject{padding:6px 12px;border:none;border-radius:6px;font-size:.75rem;font-weight:600;cursor:pointer;transition:all .2s;}
+    .btn-approve{background:#059669;color:white;}
+    .btn-approve:hover{background:#047857;}
+    .btn-reject{background:#dc2626;color:white;}
+    .btn-reject:hover{background:#b91c1c;}
+    
+    .users-table{width:100%;border-collapse:collapse;margin-top:18px;}
+    .users-table th{background:var(--gray);padding:12px;text-align:left;font-weight:600;font-size:.85rem;border-bottom:2px solid var(--gray2);}
+    .users-table td{padding:12px;border-bottom:1px solid var(--gray2);font-size:.85rem;}
+    .users-table tr:hover{background:var(--gray);}
+    
+    .role-badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.73rem;font-weight:600;background:var(--gray);color:var(--muted);}
+    .role-badge.farmer{background:#e8f5e9;color:var(--gd);}
+    .role-badge.admin{background:#fef3c7;color:#d97706;}
+    
+    @media(max-width:768px){.dash-grid{grid-template-columns:1fr}.stats-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <a href="index.html" class="logo">🌿 FarmConnect Admin</a>
+  </div>
+  <div class="header-right">
+    <div class="user-menu">
+      <span id="userName">Admin</span> |
+      <a href="#" onclick="doLogout();return false">Logout</a>
+    </div>
+  </div>
+</header>
+
+<div class="container dash-grid">
+  <div class="sidebar">
+    <div class="sidebar-title">Menu</div>
+    <button class="sidebar-item active" onclick="showSection('dashboard')">📊 Dashboard</button>
+    <button class="sidebar-item" onclick="showSection('certs')">✓ Certificates</button>
+    <button class="sidebar-item" onclick="showSection('users')">👥 Users</button>
+    <button class="sidebar-item" onclick="showSection('orders')">📦 Orders</button>
+  </div>
+
+  <div class="content">
+    <!-- DASHBOARD SECTION -->
+    <div id="dashboard" class="section active">
+      <div class="content-hd"><h2>Admin Dashboard</h2></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Total Orders</div><div class="stat-value" id="statOrders">0</div></div>
+        <div class="stat-card"><div class="stat-label">Verified Farmers</div><div class="stat-value" id="statFarmers">0</div></div>
+        <div class="stat-card"><div class="stat-label">Active Customers</div><div class="stat-value" id="statCustomers">0</div></div>
+        <div class="stat-card"><div class="stat-label">Pending Certs</div><div class="stat-value" id="statPendingCerts">0</div></div>
+      </div>
+    </div>
+
+    <!-- CERTIFICATES SECTION -->
+    <div id="certs" class="section">
+      <div class="content-hd"><h2>Certificate Verification</h2></div>
+      <p style="color:var(--muted);margin-bottom:20px;">Review and verify farmer certifications</p>
+      <table class="table-card">
+        <thead>
+          <tr><th>Farmer</th><th>Certificate</th><th>Issued By</th><th>Preview</th><th>Status</th><th>Action</th></tr>
+        </thead>
+        <tbody id="certsBody"></tbody>
+      </table>
+    </div>
+
+    <!-- USERS SECTION -->
+    <div id="users" class="section">
+      <div class="content-hd"><h2>User Management</h2></div>
+      <table class="users-table">
+        <thead>
+          <tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th></tr>
+        </thead>
+        <tbody id="usersBody"></tbody>
+      </table>
+    </div>
+
+    <!-- ORDERS SECTION -->
+    <div id="orders" class="section">
+      <div class="content-hd"><h2>All Orders</h2></div>
+      <table class="table-card">
+        <thead>
+          <tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr>
+        </thead>
+        <tbody id="ordersBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="assets/api.js"></script>
+<script>
+var currentUser = null;
+
+window.addEventListener('DOMContentLoaded', async function () {
+    var user = await checkSession('admin');
+    if (!user) return;
+
+    currentUser = user;
+    document.getElementById('userName').textContent = user.name;
+    loadDashboard();
+});
+
+function showSection(sectionId) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    document.getElementById(sectionId).classList.add('active');
+    event.target.classList.add('active');
+
+    if (sectionId === 'certs') loadCertificates();
+    else if (sectionId === 'users') loadUsers();
+    else if (sectionId === 'orders') loadAllOrders();
+}
+
+async function loadDashboard() {
+    // Load basic stats
+    var usersRes = await API.getUsers();
+    var ordersRes = await API.getOrders();
+
+    if (usersRes.success && usersRes.data) {
+        var farmers = usersRes.data.filter(u => u.role === 'farmer').length;
+        var customers = usersRes.data.filter(u => u.role === 'customer').length;
+        document.getElementById('statFarmers').textContent = farmers;
+        document.getElementById('statCustomers').textContent = customers;
+    }
+
+    if (ordersRes.success && ordersRes.orders) {
+        document.getElementById('statOrders').textContent = ordersRes.orders.length;
+    }
+
+    // Pending certs would need a specific API, for now we'll set placeholder
+    document.getElementById('statPendingCerts').textContent = '0';
+}
+
+async function loadCertificates() {
+    // This would fetch from a certificates API endpoint
+    // For now, showing placeholder
+    document.getElementById('certsBody').innerHTML = 
+        '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:40px;">Certificate verification system ready. Awaiting submissions.</td></tr>';
+}
+
+async function loadUsers() {
+    var res = await API.getUsers();
+    if (!res.success || !res.data || !res.data.length) {
+        document.getElementById('usersBody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);">No users found</td></tr>';
+        return;
+    }
+
+    document.getElementById('usersBody').innerHTML = res.data.map(u =>
+        '<tr><td>' + u.name + '</td><td>' + u.email + '</td>' +
+        '<td><span class="role-badge ' + u.role + '">' + u.role.toUpperCase() + '</span></td>' +
+        '<td><span style="color:var(--muted);font-size:.8rem;">Active</span></td>' +
+        '<td>' + formatDate(u.created_at) + '</td></tr>'
+    ).join('');
+}
+
+async function loadAllOrders() {
+    var res = await API.getOrders();
+    if (!res.success || !res.orders || !res.orders.length) {
+        document.getElementById('ordersBody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);">No orders found</td></tr>';
+        return;
+    }
+
+    document.getElementById('ordersBody').innerHTML = res.orders.map(o =>
+        '<tr><td>#' + o.id + '</td><td>' + (o.customer_name || 'Guest') + '</td>' +
+        '<td>' + (o.items_summary || 'N/A') + '</td>' +
+        '<td>₹' + parseFloat(o.total_amount || 0).toFixed(2) + '</td>' +
+        '<td><span class="status-badge status-' + o.status + '">' + o.status + '</span></td>' +
+        '<td>' + formatDate(o.created_at) + '</td></tr>'
+    ).join('');
+}
+
+async function doLogout() {
+    await API.logout();
+    window.location.href = 'index.html';
+}
+</script>
+
+</body>
+</html>

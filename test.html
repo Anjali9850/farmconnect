@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FarmConnect – System Diagnostic</title>
+<style>
+  body{font-family:Arial,sans-serif;background:#f0f4f0;margin:0;padding:30px;}
+  .wrap{max-width:720px;margin:0 auto;}
+  h1{color:#1B5E20;font-size:1.6rem;margin-bottom:6px;}
+  p{color:#555;margin-bottom:24px;}
+  .card{background:white;border-radius:12px;padding:24px;margin-bottom:18px;box-shadow:0 2px 12px rgba(0,0,0,.07);}
+  .card h2{font-size:1rem;margin-bottom:14px;color:#333;border-bottom:1px solid #eee;padding-bottom:8px;}
+  .check{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:0.87rem;border-bottom:1px solid #f5f5f5;}
+  .check:last-child{border-bottom:none;}
+  .ok  {color:#2E7D32;font-weight:700;min-width:24px;}
+  .err {color:#c62828;font-weight:700;min-width:24px;}
+  .warn{color:#e65100;font-weight:700;min-width:24px;}
+  .label{flex:1;}
+  .detail{font-size:0.78rem;color:#888;margin-top:2px;}
+  .btn{margin-top:16px;padding:10px 22px;background:#1B5E20;color:white;border:none;border-radius:8px;font-size:0.9rem;cursor:pointer;}
+  .btn:hover{background:#2E7D32;}
+  pre{background:#f5f5f5;padding:12px;border-radius:8px;font-size:0.78rem;overflow-x:auto;margin-top:10px;}
+  .section-title{font-size:1.1rem;font-weight:700;color:#1B5E20;margin:28px 0 10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🌿 FarmConnect Diagnostic</h1>
+  <p>This page tests every part of your setup. Open it at:<br>
+  <code>http://localhost/farmconnect/test.html</code></p>
+
+  <div class="card">
+    <h2>🔧 1. PHP Backend Tests</h2>
+    <div id="phpChecks">Running…</div>
+  </div>
+
+  <div class="card">
+    <h2>🗄️ 2. Database Connection</h2>
+    <div id="dbCheck">Running…</div>
+  </div>
+
+  <div class="card">
+    <h2>🔑 3. Auth – Register & Login</h2>
+    <div id="authCheck">Running…</div>
+  </div>
+
+  <div class="card">
+    <h2>📦 4. Products API</h2>
+    <div id="prodCheck">Running…</div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Results Summary</h2>
+    <div id="summary">Running tests…</div>
+    <button class="btn" onclick="runAll()">🔄 Re-run All Tests</button>
+  </div>
+</div>
+
+<script>
+const BASE = '/farmconnect/backend';
+let passed = 0, failed = 0;
+
+function row(status, label, detail='') {
+  const icon = status==='ok' ? '✅' : status==='err' ? '❌' : '⚠️';
+  const cls  = status==='ok' ? 'ok' : status==='err' ? 'err' : 'warn';
+  if (status==='ok') passed++; else failed++;
+  return `<div class="check">
+    <span class="${cls}">${icon}</span>
+    <div class="label">${label}${detail?`<div class="detail">${detail}</div>`:''}
+    </div></div>`;
+}
+
+async function testEndpoint(path, opts={}) {
+  try {
+    const r = await fetch(BASE + path, { credentials:'include', ...opts });
+    const txt = await r.text();
+    let json = null;
+    try { json = JSON.parse(txt); } catch(e){}
+    return { ok: r.ok, status: r.status, json, text: txt };
+  } catch(e) {
+    return { ok: false, status: 0, json: null, text: e.message };
+  }
+}
+
+async function runAll() {
+  passed=0; failed=0;
+
+  // ── PHP checks ────────────────────────────────────────────
+  document.getElementById('phpChecks').innerHTML = 'Testing…';
+  const sessionRes = await testEndpoint('/auth/session.php');
+  let html = '';
+
+  if (sessionRes.status === 0) {
+    html += row('err','Cannot reach backend',
+      'Apache may be off, or files are not in htdocs/farmconnect/backend/. ' +
+      'Check XAMPP Apache is running.');
+  } else {
+    html += row('ok','Apache is running and serving PHP', 'Status: '+sessionRes.status);
+  }
+
+  if (sessionRes.json !== null) {
+    html += row('ok','PHP returns valid JSON','backend/auth/session.php responded correctly');
+  } else if (sessionRes.status > 0) {
+    html += row('err','PHP returned non-JSON response',
+      'Raw response: ' + sessionRes.text.substring(0,200) + '…' +
+      '<br>This usually means a PHP syntax error or wrong PHP version. ' +
+      'Check Apache error log: C:\\xampp\\apache\\logs\\error.log');
+  }
+
+  document.getElementById('phpChecks').innerHTML = html;
+
+  // ── DB check ──────────────────────────────────────────────
+  document.getElementById('dbCheck').innerHTML = 'Testing…';
+  const loginRes = await testEndpoint('/auth/login.php', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({email:'admin@farmconnect.com', password:'admin123'})
+  });
+
+  let dbHtml = '';
+  if (!loginRes.json) {
+    dbHtml += row('err','Could not reach login endpoint', loginRes.text.substring(0,200));
+  } else if (loginRes.json.success) {
+    dbHtml += row('ok','Database connected','Login successful');
+    dbHtml += row('ok','Bcrypt password verification works','admin123 verified correctly');
+    dbHtml += row('ok','Session management works','Session cookie set');
+    // Logout again
+    await testEndpoint('/auth/logout.php');
+  } else {
+    dbHtml += row('err','Login failed: ' + loginRes.json.message,
+      'This usually means: (1) Database not imported, (2) Wrong DB credentials in config.php, ' +
+      '(3) Bcrypt hash mismatch. Try re-importing farmconnect.sql via phpMyAdmin.');
+  }
+  document.getElementById('dbCheck').innerHTML = dbHtml;
+
+  // ── Auth register/login ────────────────────────────────────
+  document.getElementById('authCheck').innerHTML = 'Testing…';
+  let authHtml = '';
+
+  // Register a test user
+  const testEmail = 'test_' + Date.now() + '@farmconnect.test';
+  const regRes = await testEndpoint('/auth/register.php', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({name:'Test User',email:testEmail,password:'test123',role:'customer'})
+  });
+
+  if (regRes.json && regRes.json.success) {
+    authHtml += row('ok','Register API works','New customer account created');
+    // Login with same credentials
+    const lRes = await testEndpoint('/auth/login.php', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email:testEmail, password:'test123'})
+    });
+    if (lRes.json && lRes.json.success) {
+      authHtml += row('ok','Login API works','Session created for new user');
+      // Session check
+      const sRes = await testEndpoint('/auth/session.php');
+      if (sRes.json && sRes.json.success) {
+        authHtml += row('ok','Session persists correctly','session.php confirms user is logged in');
+      } else {
+        authHtml += row('warn','Session check failed',
+          'Cookies may not be working. Make sure you open the site via http://localhost, not by opening the HTML file directly.');
+      }
+      await testEndpoint('/auth/logout.php');
+    } else {
+      authHtml += row('err','Login after register failed', lRes.json ? lRes.json.message : lRes.text);
+    }
+  } else {
+    authHtml += row('err','Register failed', regRes.json ? regRes.json.message : regRes.text);
+  }
+  document.getElementById('authCheck').innerHTML = authHtml;
+
+  // ── Products ──────────────────────────────────────────────
+  document.getElementById('prodCheck').innerHTML = 'Testing…';
+  const pRes = await testEndpoint('/products/get_products.php');
+  let pHtml = '';
+  if (pRes.json && pRes.json.success) {
+    const count = pRes.json.data.length;
+    if (count > 0) {
+      pHtml += row('ok',`Products API works – ${count} products found`,'get_products.php is returning data from the database');
+    } else {
+      pHtml += row('warn','Products API works but 0 products found',
+        'Make sure you imported farmconnect.sql which includes seed products. ' +
+        'Go to phpMyAdmin and run the SQL file again.');
+    }
+  } else {
+    pHtml += row('err','Products API failed', pRes.json ? pRes.json.message : pRes.text);
+  }
+  document.getElementById('prodCheck').innerHTML = pHtml;
+
+  // ── Summary ───────────────────────────────────────────────
+  const total = passed + failed;
+  const colour = failed===0 ? '#2E7D32' : '#c62828';
+  document.getElementById('summary').innerHTML = `
+    <div style="font-size:1.3rem;font-weight:700;color:${colour};margin-bottom:10px">
+      ${failed===0 ? '🎉 All tests passed!' : `⚠️ ${failed} test(s) failed out of ${total}`}
+    </div>
+    <div style="font-size:0.88rem;color:#555">
+      ${failed===0
+        ? 'Your FarmConnect installation is working correctly.<br>Go to <a href="/farmconnect/frontend/index.html">the site →</a>'
+        : 'Fix the issues above, then click Re-run All Tests.'}
+    </div>`;
+}
+
+// Auto-run on load
+window.addEventListener('DOMContentLoaded', runAll);
+</script>
+</body>
+</html>

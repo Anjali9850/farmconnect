@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FarmConnect – Direct Farmer Marketplace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{--gd:#1B5E20;--gm:#2E7D32;--gl:#4CAF50;--white:#fff;--gray:#F3F4F6;--gray2:#E5E7EB;--dark:#1a1a1a;--muted:#6B7280;--sh:0 4px 24px rgba(0,0,0,.07);--shh:0 8px 40px rgba(27,94,32,.15);}
+    *{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+    body{font-family:'DM Sans',sans-serif;color:var(--dark);background:var(--white);overflow-x:hidden;}
+    h1,h2,h3,h4{font-family:'Playfair Display',serif;}
+
+    /* NAV */
+    nav{position:sticky;top:0;z-index:1000;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--gray2);padding:0 5%;display:flex;align-items:center;justify-content:space-between;height:68px;}
+    .logo{display:flex;align-items:center;gap:10px;font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--gd);text-decoration:none;}
+    .logo-box{width:36px;height:36px;background:var(--gd);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+    .logo-box svg{width:20px;height:20px;fill:white;}
+    .nav-links{display:flex;align-items:center;gap:2px;}
+    .nav-links a{padding:6px 12px;border-radius:6px;font-size:0.85rem;font-weight:500;color:var(--dark);text-decoration:none;transition:all .2s;}
+    .nav-links a:hover{background:var(--gray);color:var(--gd);}
+    .nav-actions{display:flex;align-items:center;gap:10px;}
+    .search-wrap{display:flex;align-items:center;background:var(--gray);border-radius:8px;padding:7px 12px;gap:7px;width:190px;}
+    .search-wrap input{background:none;border:none;outline:none;font-size:.84rem;width:100%;font-family:'DM Sans',sans-serif;}
+    .btn-login{padding:7px 18px;border-radius:8px;background:none;border:1.5px solid var(--gd);color:var(--gd);font-weight:600;font-size:.85rem;cursor:pointer;transition:all .2s;}
+    .btn-login:hover{background:var(--gd);color:white;}
+    .btn-dash{padding:7px 16px;border-radius:8px;background:var(--gd);color:white;border:none;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block;}
+    .btn-dash:hover{background:var(--gm);}
+    .btn-cart{display:flex;align-items:center;gap:7px;padding:7px 16px;border-radius:8px;background:var(--gd);color:white;border:none;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;position:relative;}
+    .btn-cart:hover{background:var(--gm);}
+    .btn-cart svg{width:16px;height:16px;fill:none;stroke:white;stroke-width:2;}
+    .cart-badge{position:absolute;top:-6px;right:-6px;background:#e53e3e;color:white;border-radius:50%;width:18px;height:18px;font-size:.7rem;display:flex;align-items:center;justify-content:center;font-weight:700;}
+
+    /* HERO */
+    .hero{min-height:88vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:0 5%;background:linear-gradient(135deg,#f9faf5 55%,#e8f5e9 100%);gap:48px;}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;background:#e8f5e9;color:var(--gd);padding:5px 14px;border-radius:20px;font-size:.79rem;font-weight:600;margin-bottom:22px;border:1px solid #c8e6c9;}
+    .dot{width:7px;height:7px;background:var(--gl);border-radius:50%;display:inline-block;}
+    .hero h1{font-size:clamp(2.1rem,3.8vw,3.5rem);line-height:1.18;margin-bottom:22px;}
+    .hero h1 em{color:var(--gd);font-style:normal;}
+    .hero p{font-size:1.02rem;color:var(--muted);line-height:1.75;margin-bottom:36px;max-width:440px;}
+    .hero-ctas{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:48px;}
+    .btn-primary{padding:13px 28px;background:var(--gd);color:white;border:none;border-radius:10px;font-size:.93rem;font-weight:600;cursor:pointer;transition:all .25s;text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
+    .btn-primary:hover{background:var(--gm);transform:translateY(-2px);box-shadow:var(--shh);}
+    .btn-secondary{padding:13px 28px;background:white;color:var(--gd);border:2px solid var(--gd);border-radius:10px;font-size:.93rem;font-weight:600;cursor:pointer;transition:all .25s;text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
+    .btn-secondary:hover{background:var(--gd);color:white;transform:translateY(-2px);}
+    .hero-stats{display:flex;gap:36px;}
+    .stat-num{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:var(--gd);}
+    .stat-label{font-size:.78rem;color:var(--muted);font-weight:500;margin-top:2px;}
+    .hero-img-col{position:relative;display:flex;align-items:center;justify-content:center;}
+    .hero-img{width:100%;max-width:440px;height:460px;border-radius:24px;overflow:hidden;box-shadow:var(--shh);background:var(--gray);}
+    .hero-img img{width:100%;height:100%;object-fit:cover;display:block;}
+    .float-card{position:absolute;bottom:-16px;left:-36px;background:white;border-radius:14px;padding:14px 18px;box-shadow:0 6px 28px rgba(0,0,0,.1);display:flex;align-items:center;gap:12px;min-width:170px;}
+    .float-icon{width:44px;height:44px;background:#e8f5e9;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .float-icon svg{width:22px;height:22px;stroke:var(--gd);stroke-width:2;fill:none;}
+    .float-text strong{display:block;font-size:.9rem;font-weight:700;}
+    .float-text small{font-size:.75rem;color:var(--muted);}
+    .float-card2{position:absolute;top:28px;right:-36px;background:var(--gd);color:white;border-radius:14px;padding:14px 18px;box-shadow:var(--shh);text-align:center;min-width:110px;}
+    .float2-num{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;}
+    .float2-label{font-size:.72rem;opacity:.8;margin-top:2px;}
+
+    /* SECTIONS */
+    .stag{display:inline-block;background:#e8f5e9;color:var(--gd);padding:4px 14px;border-radius:20px;font-size:.77rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;margin-bottom:12px;}
+    .sec-hd{text-align:center;margin-bottom:52px;}
+    .sec-hd h2{font-size:clamp(1.75rem,2.8vw,2.5rem);margin-bottom:12px;}
+    .sec-hd p{font-size:.97rem;color:var(--muted);max-width:480px;margin:0 auto;line-height:1.7;}
+
+    /* HOW IT WORKS */
+    .hiw{padding:88px 5%;background:var(--white);}
+    .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;}
+    .step{text-align:center;padding:36px 22px;background:var(--gray);border-radius:18px;transition:all .3s;position:relative;}
+    .step:hover{background:#e8f5e9;transform:translateY(-6px);box-shadow:var(--sh);}
+    .step-n{position:absolute;top:14px;right:16px;font-family:'Playfair Display',serif;font-size:3rem;font-weight:700;color:rgba(76,175,80,.1);line-height:1;}
+    .step-icon{width:60px;height:60px;border-radius:16px;background:#e8f5e9;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;}
+    .step-icon svg{width:28px;height:28px;stroke:var(--gd);stroke-width:1.8;fill:none;}
+    .step h3{font-size:1.05rem;margin-bottom:10px;color:var(--gd);}
+    .step p{font-size:.86rem;color:var(--muted);line-height:1.65;}
+
+    /* PRODUCTS */
+    .prod-sec{padding:88px 5%;background:var(--gray);}
+    .prod-hd{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:36px;}
+    .filter-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:30px;}
+    .ftab{padding:7px 18px;border-radius:20px;border:1.5px solid var(--gray2);background:white;color:var(--muted);font-size:.83rem;font-weight:500;cursor:pointer;transition:all .2s;}
+    .ftab.active,.ftab:hover{background:var(--gd);color:white;border-color:var(--gd);}
+    .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:20px;}
+    .pcard{background:white;border-radius:18px;overflow:hidden;box-shadow:var(--sh);transition:all .3s;}
+    .pcard:hover{transform:translateY(-6px);box-shadow:var(--shh);}
+    .pimg{height:200px;background:var(--gray);position:relative;overflow:hidden;}
+    .pimg img{width:100%;height:100%;object-fit:cover;display:block;}
+    .pimg-ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+    .pimg-ph svg{stroke:#ccc;fill:none;stroke-width:1.3;}
+    .pimg-ph span{font-size:.76rem;color:#ccc;}
+    .pbadge{position:absolute;top:11px;left:11px;background:var(--gd);color:white;padding:3px 10px;border-radius:6px;font-size:.71rem;font-weight:600;z-index:2;}
+    .pinfo{padding:16px 18px 18px;}
+    .pfarmer{font-size:.77rem;color:var(--muted);margin-bottom:5px;}
+    .pname{font-size:1.02rem;font-weight:600;margin-bottom:10px;}
+    .pmeta{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .pprice{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--gd);}
+    .punit{font-size:.76rem;color:var(--muted);font-family:'DM Sans',sans-serif;}
+    .pcat{font-size:.76rem;color:var(--muted);text-transform:capitalize;}
+    .btn-addcart{width:100%;padding:10px;background:var(--gd);color:white;border:none;border-radius:10px;font-size:.87rem;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px;}
+    .btn-addcart svg{width:15px;height:15px;stroke:white;fill:none;stroke-width:2;}
+    .btn-addcart:hover{background:var(--gm);}
+    .btn-addcart:disabled{opacity:.6;cursor:not-allowed;}
+    .btn-addcart.added{background:#388e3c;}
+    .loading-ph{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;color:var(--muted);grid-column:1/-1;}
+    .spinner{width:30px;height:30px;border:3px solid var(--gray2);border-top-color:var(--gd);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:12px;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* SUBSCRIPTIONS */
+    .sub-sec{padding:88px 5%;background:#f8faf5;}
+    .sub-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+    .sub-card{background:white;border-radius:22px;padding:36px 30px;box-shadow:var(--sh);transition:all .3s;position:relative;overflow:hidden;}
+    .sub-card.pop{background:var(--gd);color:white;transform:scale(1.03);}
+    .sub-card:hover{transform:translateY(-5px) scale(1.01);box-shadow:var(--shh);}
+    .sub-card.pop:hover{transform:translateY(-5px) scale(1.04);}
+    .pop-badge{position:absolute;top:20px;right:-30px;background:#f59e0b;color:white;padding:4px 38px;font-size:.73rem;font-weight:700;transform:rotate(40deg);}
+    .sub-name{font-size:.82rem;font-weight:600;text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;color:var(--muted);}
+    .sub-card.pop .sub-name{color:rgba(255,255,255,.65);}
+    .sub-price{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:700;margin-bottom:4px;color:var(--gd);}
+    .sub-card.pop .sub-price{color:white;}
+    .sub-per{font-size:.81rem;color:var(--muted);margin-bottom:26px;}
+    .sub-card.pop .sub-per{color:rgba(255,255,255,.6);}
+    .sub-feats{list-style:none;margin-bottom:28px;display:flex;flex-direction:column;gap:10px;}
+    .sub-feats li{display:flex;align-items:center;gap:10px;font-size:.87rem;}
+    .chk{width:17px;height:17px;background:#e8f5e9;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .chk svg{width:9px;height:9px;stroke:var(--gd);fill:none;stroke-width:3;}
+    .sub-card.pop .chk{background:rgba(255,255,255,.2);}
+    .sub-card.pop .chk svg{stroke:white;}
+    .btn-sub{width:100%;padding:13px;border-radius:12px;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .25s;border:none;background:var(--gd);color:white;}
+    .sub-card.pop .btn-sub{background:white;color:var(--gd);}
+    .btn-sub:hover{opacity:.88;transform:translateY(-1px);}
+
+    /* CTA */
+    .cta{padding:80px 5%;text-align:center;background:linear-gradient(135deg,#1B5E20,#2E7D32);color:white;}
+    .cta h2{font-size:clamp(1.75rem,3vw,2.7rem);margin-bottom:14px;}
+    .cta p{font-size:1rem;opacity:.78;margin-bottom:34px;max-width:480px;margin-left:auto;margin-right:auto;}
+    .cta-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+    .btn-cw{padding:13px 30px;background:white;color:var(--gd);border:none;border-radius:10px;font-size:.93rem;font-weight:700;cursor:pointer;transition:all .25s;}
+    .btn-cw:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.2);}
+    .btn-co{padding:13px 30px;background:transparent;color:white;border:2px solid rgba(255,255,255,.45);border-radius:10px;font-size:.93rem;font-weight:600;cursor:pointer;transition:all .25s;}
+    .btn-co:hover{border-color:white;background:rgba(255,255,255,.1);}
+
+    /* FOOTER */
+    footer{background:#0d2d10;color:rgba(255,255,255,.72);padding:60px 5% 28px;}
+    .fg{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:44px;}
+    .flogo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:white;display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+    .flogo-box{width:32px;height:32px;background:var(--gl);border-radius:7px;display:flex;align-items:center;justify-content:center;}
+    .flogo-box svg{width:18px;height:18px;fill:white;}
+    .fbrand p{font-size:.86rem;line-height:1.72;max-width:270px;margin-bottom:18px;}
+    .fcol h4{color:white;font-size:.9rem;font-weight:600;margin-bottom:16px;font-family:'DM Sans',sans-serif;}
+    .fcol a{display:block;color:rgba(255,255,255,.58);font-size:.83rem;text-decoration:none;margin-bottom:9px;transition:color .2s;}
+    .fcol a:hover{color:var(--gl);}
+    .fbot{border-top:1px solid rgba(255,255,255,.09);padding-top:22px;display:flex;align-items:center;justify-content:space-between;font-size:.81rem;flex-wrap:wrap;gap:10px;}
+    .fbadges{display:flex;gap:8px;flex-wrap:wrap;}
+    .fbadge{background:rgba(255,255,255,.09);padding:3px 11px;border-radius:6px;font-size:.76rem;}
+
+    /* MODAL */
+    .modal-ov{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.48);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px;}
+    .modal-ov.open{display:flex;}
+    .modal{background:white;border-radius:22px;padding:38px;width:100%;max-width:420px;position:relative;animation:mUp .3s ease;}
+    @keyframes mUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+    .modal-x{position:absolute;top:14px;right:14px;background:var(--gray);border:none;border-radius:50%;width:31px;height:31px;cursor:pointer;font-size:.95rem;display:flex;align-items:center;justify-content:center;color:var(--dark);}
+    .modal-x:hover{background:var(--gray2);}
+    .modal h2{font-size:1.55rem;margin-bottom:5px;color:var(--gd);}
+    .modal>p{font-size:.87rem;color:var(--muted);margin-bottom:24px;}
+    .mtabs{display:flex;margin-bottom:26px;border:1.5px solid var(--gray2);border-radius:10px;overflow:hidden;}
+    .mtab{flex:1;padding:9px;background:none;border:none;font-size:.87rem;font-weight:600;cursor:pointer;transition:all .2s;color:var(--muted);}
+    .mtab.active{background:var(--gd);color:white;}
+    .fg2{margin-bottom:16px;}
+    .fg2 label{display:block;font-size:.83rem;font-weight:500;margin-bottom:6px;}
+    .fg2 input,.fg2 select{width:100%;padding:10px 13px;border:1.5px solid var(--gray2);border-radius:9px;font-size:.88rem;outline:none;transition:border .2s;background:var(--gray);font-family:'DM Sans',sans-serif;}
+    .fg2 input:focus,.fg2 select:focus{border-color:var(--gl);background:white;}
+    .btn-submit{width:100%;padding:12px;background:var(--gd);color:white;border:none;border-radius:10px;font-size:.93rem;font-weight:700;cursor:pointer;transition:all .2s;}
+    .btn-submit:hover{background:var(--gm);}
+    .btn-submit:disabled{opacity:.6;cursor:not-allowed;}
+    .role-row{display:flex;gap:9px;margin-bottom:18px;}
+    .rbtn{flex:1;padding:9px 6px;border-radius:9px;border:1.5px solid var(--gray2);background:var(--gray);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .2s;text-align:center;}
+    .rbtn.active{background:#e8f5e9;border-color:var(--gl);color:var(--gd);font-weight:600;}
+
+    /* CART DRAWER */
+    .cart-drawer{position:fixed;right:-410px;top:0;height:100%;width:380px;background:white;z-index:9998;box-shadow:-4px 0 28px rgba(0,0,0,.11);transition:right .35s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;}
+    .cart-drawer.open{right:0;}
+    .cart-hd{padding:20px 22px;border-bottom:1px solid var(--gray2);display:flex;align-items:center;justify-content:space-between;}
+    .cart-hd h3{font-size:1.15rem;display:flex;align-items:center;gap:8px;}
+    .cart-hd h3 svg{width:18px;height:18px;stroke:var(--gd);fill:none;stroke-width:2;}
+    .cart-x{background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.2rem;line-height:1;}
+    .cart-body{flex:1;overflow-y:auto;padding:18px 22px;}
+    .cart-empty{text-align:center;padding:44px 20px;color:var(--muted);}
+    .cart-empty svg{width:50px;height:50px;stroke:var(--gray2);fill:none;stroke-width:1.2;margin-bottom:14px;}
+    .citem{display:flex;gap:13px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--gray);}
+    .citem-img{width:58px;height:58px;border-radius:10px;background:var(--gray);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;}
+    .citem-img img{width:100%;height:100%;object-fit:cover;}
+    .citem-img svg{width:22px;height:22px;stroke:#ccc;fill:none;stroke-width:1.5;}
+    .citem-info{flex:1;}
+    .citem-name{font-weight:600;font-size:.88rem;margin-bottom:3px;}
+    .citem-farmer{font-size:.75rem;color:var(--muted);margin-bottom:8px;}
+    .citem-row{display:flex;align-items:center;justify-content:space-between;}
+    .qty{display:flex;align-items:center;gap:8px;}
+    .qbtn{width:26px;height:26px;border-radius:6px;border:1.5px solid var(--gray2);background:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .2s;color:var(--dark);}
+    .qbtn:hover{background:var(--gd);color:white;border-color:var(--gd);}
+    .qnum{font-size:.87rem;font-weight:600;min-width:18px;text-align:center;}
+    .citem-price{font-weight:700;color:var(--gd);font-size:.9rem;}
+    .cart-ft{padding:18px 22px;border-top:1px solid var(--gray2);}
+    .cart-total{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+    .cart-total strong{font-size:1.05rem;}
+    .cart-total span{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--gd);font-weight:700;}
+    .btn-checkout{width:100%;padding:13px;background:var(--gd);color:white;border:none;border-radius:12px;font-size:.93rem;font-weight:700;cursor:pointer;transition:all .2s;}
+    .btn-checkout:hover{background:var(--gm);}
+
+    /* SCROLL TOP */
+    .scroll-top{position:fixed;bottom:22px;left:22px;z-index:999;width:42px;height:42px;border-radius:11px;background:var(--gd);color:white;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--sh);opacity:0;transition:all .3s;pointer-events:none;}
+    .scroll-top.vis{opacity:1;pointer-events:all;}
+    .scroll-top svg{width:18px;height:18px;stroke:white;fill:none;stroke-width:2.5;}
+
+    /* RESPONSIVE */
+    @media(max-width:1100px){.steps{grid-template-columns:repeat(2,1fr)}.fg{grid-template-columns:1fr 1fr}}
+    @media(max-width:900px){.hero{grid-template-columns:1fr;min-height:auto;padding:60px 5% 40px}.hero-img-col{display:none}.sub-grid{grid-template-columns:1fr}.sub-card.pop{transform:none}.nav-links{display:none}}
+    @media(max-width:640px){.steps{grid-template-columns:1fr}.fg{grid-template-columns:1fr}.prod-hd{flex-direction:column;align-items:flex-start;gap:10px}.hero-stats{gap:22px}.cart-drawer{width:100%;right:-100%}}
+
+    /* FARMER CARDS */
+    .fcard{background:white;border-radius:18px;overflow:hidden;box-shadow:var(--sh);transition:all .3s;cursor:pointer;}
+    .fcard:hover{transform:translateY(-6px);box-shadow:var(--shh);}
+    .fcard-header{height:160px;background:linear-gradient(135deg,#e8f5e9,#c8e6c9);position:relative;}
+    .fcard-img{width:100px;height:100px;border-radius:16px;border:3px solid white;position:absolute;bottom:-50px;left:18px;background:var(--gray);overflow:hidden;}
+    .fcard-img img{width:100%;height:100%;object-fit:cover;}
+    .fcard-body{padding:60px 18px 18px;}
+    .fcard-name{font-size:1.1rem;font-weight:600;margin-bottom:4px;}
+    .fcard-location{font-size:.8rem;color:var(--muted);margin-bottom:10px;}
+    .fcard-rating{font-size:.85rem;color:var(--gd);font-weight:600;margin-bottom:10px;}
+    .fcard-bio{font-size:.85rem;color:var(--muted);line-height:1.6;margin-bottom:14px;min-height:40px;max-height:60px;overflow:hidden;}
+    .fcard-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+    .fbadge{background:#e8f5e9;color:var(--gd);padding:3px 9px;border-radius:6px;font-size:.7rem;font-weight:600;}
+    .fcard-btn{width:100%;padding:10px;background:var(--gd);color:white;border:none;border-radius:10px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;}
+    .fcard-btn:hover{background:var(--gm);}
+
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">
+    <div class="logo-box"><svg viewBox="0 0 24 24"><path d="M12 2C8 2 4 6 4 10c0 5 8 12 8 12s8-7 8-12c0-4-4-8-8-8z"/></svg></div>
+    FarmConnect
+  </a>
+  <div class="nav-links">
+    <a href="#">Home</a>
+    <a href="#farmers">Farmers</a>
+    <a href="#exotic">Exotic Fruits</a>
+    <a href="#organic">Organic</a>
+    <a href="#subscription">Subscriptions</a>
+    <a href="#">About</a>
+  </div>
+  <div class="nav-actions">
+    <div class="search-wrap">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Search produce…">
+    </div>
+    <div id="navAuth">
+      <button class="btn-login" onclick="openModal()">Login</button>
+    </div>
+    <button class="btn-cart" onclick="toggleCart()">
+      <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      Cart <span class="cart-badge" id="cartBadge">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <div class="hero-badge"><span class="dot"></span> Trusted by 12K+ Families</div>
+    <h1>Fresh Produce <em>Directly</em><br>From Farmers to Your Home</h1>
+    <p>Skip the middlemen. Connect directly with verified local farmers for fresh, organic produce delivered to your doorstep — supporting communities along the way.</p>
+    <div class="hero-ctas">
+      <a href="#organic" class="btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Shop Now
+      </a>
+      <button class="btn-secondary" onclick="openModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Join as Farmer
+      </button>
+    </div>
+    <div class="hero-stats">
+      <div><div class="stat-num">850+</div><div class="stat-label">Verified Farmers</div></div>
+      <div><div class="stat-num">4,200+</div><div class="stat-label">Products Listed</div></div>
+      <div><div class="stat-num">12K+</div><div class="stat-label">Happy Customers</div></div>
+    </div>
+  </div>
+  <div class="hero-img-col">
+    <div class="hero-img">
+      <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80&auto=format" alt="Fresh vegetables" onerror="this.style.display='none'">
+    </div>
+    <div class="float-card">
+      <div class="float-icon"><svg viewBox="0 0 24 24"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/></svg></div>
+      <div class="float-text"><strong>100% Organic</strong><small>Certified Fresh</small></div>
+    </div>
+    <div class="float-card2"><div class="float2-num">4.9 ★</div><div class="float2-label">Customer Rating</div></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="hiw">
+  <div class="sec-hd">
+    <div class="stag">The Process</div>
+    <h2>How FarmConnect Works</h2>
+    <p>A simple, transparent process connecting farmers to your table in just four steps.</p>
+  </div>
+  <div class="steps">
+    <div class="step"><span class="step-n">01</span><div class="step-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div><h3>Browse Produce</h3><p>Explore thousands of fresh products from verified local farmers and choose what you love.</p></div>
+    <div class="step"><span class="step-n">02</span><div class="step-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><h3>Choose Your Farmer</h3><p>See full farmer profiles, farm locations, and practices before you buy.</p></div>
+    <div class="step"><span class="step-n">03</span><div class="step-icon"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><h3>Secure Checkout</h3><p>Pay safely. Your order is confirmed instantly and goes directly to the farm.</p></div>
+    <div class="step"><span class="step-n">04</span><div class="step-icon"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div><h3>Fresh Delivery</h3><p>Same-day or next-day delivery straight from farm to your door.</p></div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section class="prod-sec" id="organic">
+  <div class="prod-hd">
+    <div><div class="stag">Market</div><h2 style="font-size:2rem;margin-top:6px">Organic Products</h2></div>
+  </div>
+  <div class="filter-tabs">
+    <button class="ftab active" onclick="filterCat('all',this)">All Products</button>
+    <button class="ftab" onclick="filterCat('vegetable',this)">Vegetables</button>
+    <button class="ftab" onclick="filterCat('fruit',this)">Fruits</button>
+    <button class="ftab" onclick="filterCat('grain',this)">Grains</button>
+    <button class="ftab" onclick="filterCat('dairy',this)">Dairy</button>
+  </div>
+  <div class="pgrid" id="prodGrid">
+    <div class="loading-ph"><div class="spinner"></div><span>Loading products…</span></div>
+  </div>
+</section>
+
+<!-- EXOTIC FRUITS -->
+<section class="prod-sec" id="exotic">
+  <div class="prod-hd">
+    <div><div class="stag">Premium Selection</div><h2 style="font-size:2rem;margin-top:6px">Exotic & Specialty Fruits</h2></div>
+  </div>
+  <div class="filter-tabs">
+    <button class="ftab active" onclick="filterCat('all','exotic',this)">All Exotic</button>
+    <button class="ftab" onclick="filterCat('tropical','exotic',this)">Tropical</button>
+    <button class="ftab" onclick="filterCat('citrus','exotic',this)">Citrus</button>
+    <button class="ftab" onclick="filterCat('berries','exotic',this)">Berries</button>
+  </div>
+  <div class="pgrid" id="exoticGrid">
+    <div class="loading-ph"><div class="spinner"></div><span>Loading exotic fruits…</span></div>
+  </div>
+</section>
+
+<!-- FARMERS DIRECTORY -->
+<section class="prod-sec" id="farmers" style="background:#f8faf5;">
+  <div class="sec-hd">
+    <div class="stag">Meet Your Farmers</div>
+    <h2>Verified Local Farmers Directory</h2>
+    <p>Connect directly with the farmers growing your food. See their certifications, practices, and farm stories.</p>
+  </div>
+  <div class="filter-tabs">
+    <button class="ftab active" onclick="searchFarmers()">All Farmers</button>
+    <button class="ftab" onclick="searchFarmers('fruit')">Fruit Specialists</button>
+    <button class="ftab" onclick="searchFarmers('vegetable')">Vegetable Farmers</button>
+    <button class="ftab" onclick="searchFarmers('organic')">Organic Certified</button>
+  </div>
+  <div id="farmersGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-top:30px;">
+    <div class="loading-ph"><div class="spinner"></div><span>Loading farmers…</span></div>
+  </div>
+</section>
+
+<!-- SUBSCRIPTION -->
+<section class="sub-sec" id="subscription">
+  <div class="sec-hd">
+    <div class="stag">Premium Membership</div>
+    <h2>FarmConnect Premium</h2>
+    <p>Get weekly fresh boxes, exclusive discounts, and priority access to seasonal produce.</p>
+  </div>
+  <div class="sub-grid">
+    <div class="sub-card">
+      <div class="sub-name">Monthly</div><div class="sub-price">₹599</div><div class="sub-per">per month</div>
+      <ul class="sub-feats">
+        <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Weekly vegetable box (4 kg)</li>
+        <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>10% discount on all orders</li>
+        <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Free delivery on orders ₹300+</li>
+      </ul>
+      <button class="btn-sub" onclick="subscribeToPlan('monthly')">Get Started</button>
+    </div>
+    <div class="sub-card pop">
+      <div class="pop-badge">BEST VALUE</div>
+      <div class="sub-name">Quarterly</div><div class="sub-price">₹1,499</div><div class="sub-per">₹499/mo · billed every 3 months</div>
+      <ul class="sub-feats">
+        <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Weekly vegetable box (6 kg)</li>
+        <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>20% discount on all orders</li>
+        <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Free delivery on all orders</li>
+        <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Early exotic fruit access</li>
+        <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Recipe cards included</li>
+      </ul>
+      <button class="btn-sub" onclick="subscribeToPlan('quarterly')">Get Started</button>
+    </div>
+    <div class="sub-card">
+      <div class="sub-name">Yearly</div><div class="sub-price">₹4,999</div><div class="sub-per">₹416/mo · billed annually</div>
+      <ul class="sub-feats">
+        <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Weekly vegetable box (8 kg)</li>
+        <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>30% discount on all orders</li>
+        <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Free delivery + priority shipping</li>
+        <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Exclusive farmer meetups</li>
+        <li><span class="chk"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></span>Nutritionist consultation</li>
+      </ul>
+      <button class="btn-sub" onclick="subscribeToPlan('yearly')">Get Started</button>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <h2>Start Selling Your Farm Produce</h2>
+  <p>Join 850+ farmers already earning more by selling directly to consumers through FarmConnect.</p>
+  <div class="cta-btns">
+    <button class="btn-cw" onclick="openModal()">Become a Farmer</button>
+    <button class="btn-co" onclick="openModal()">Create Customer Account</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="fg">
+    <div class="fbrand">
+      <div class="flogo"><div class="flogo-box"><svg viewBox="0 0 24 24"><path d="M12 2C8 2 4 6 4 10c0 5 8 12 8 12s8-7 8-12c0-4-4-8-8-8z"/></svg></div>FarmConnect</div>
+      <p>Bridging the gap between farmers and consumers. Fresh, honest, sustainable food for every family.</p>
+    </div>
+    <div class="fcol"><h4>Marketplace</h4><a href="#">Organic Vegetables</a><a href="#">Exotic Fruits</a><a href="#">Dairy Products</a><a href="#">Grains &amp; Pulses</a></div>
+    <div class="fcol"><h4>For Farmers</h4><a href="#" onclick="openModal();return false">Farmer Registration</a><a href="farmer.html">Seller Dashboard</a><a href="#">Support Center</a></div>
+    <div class="fcol"><h4>Company</h4><a href="#">About Us</a><a href="#">Our Mission</a><a href="#">Blog</a><a href="#">Privacy Policy</a></div>
+  </div>
+  <div class="fbot">
+    <span>© 2025 FarmConnect. All rights reserved.</span>
+    <div class="fbadges"><span class="fbadge">SSL Secured</span><span class="fbadge">FSSAI Certified</span><span class="fbadge">Organic Partner</span></div>
+  </div>
+</footer>
+
+<!-- AUTH MODAL -->
+<div class="modal-ov" id="modalOv" onclick="closeModalOut(event)">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal()">✕</button>
+    <h2>Welcome to FarmConnect</h2>
+    <p>Login or create your account to get started</p>
+    <div class="mtabs">
+      <button class="mtab active" onclick="switchTab('login',this)">Login</button>
+      <button class="mtab" onclick="switchTab('register',this)">Register</button>
+    </div>
+    <!-- LOGIN -->
+    <div id="loginForm">
+      <div class="fg2"><label>Email Address</label><input type="email" id="lEmail" placeholder="you@example.com"></div>
+      <div class="fg2"><label>Password</label><input type="password" id="lPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn-submit" id="lBtn" onclick="doLogin()">Login to FarmConnect</button>
+    </div>
+    <!-- REGISTER -->
+    <div id="registerForm" style="display:none">
+      <div class="role-row">
+        <div class="rbtn active" data-role="customer" onclick="pickRole(this)">🛒 Customer</div>
+        <div class="rbtn" data-role="farmer" onclick="pickRole(this)">🌾 Farmer</div>
+      </div>
+      <div class="fg2"><label>Full Name *</label><input type="text" id="rName" placeholder="Priya Sharma"></div>
+      <div class="fg2"><label>Email Address *</label><input type="email" id="rEmail" placeholder="you@example.com"></div>
+      <div class="fg2"><label>Phone Number</label><input type="tel" id="rPhone" placeholder="+91 99999 99999"></div>
+      <div class="fg2"><label>Password * (min 6 chars)</label><input type="password" id="rPass" placeholder="••••••••"></div>
+      <button class="btn-submit" id="rBtn" onclick="doRegister()">Create My Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- CART DRAWER -->
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-hd">
+    <h3><svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Your Cart</h3>
+    <button class="cart-x" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-body" id="cartBody"></div>
+  <div class="cart-ft" id="cartFt" style="display:none">
+    <div class="cart-total"><strong>Total</strong><span id="cartTot">₹0.00</span></div>
+    <button class="btn-checkout" onclick="doCheckout()">Proceed to Checkout →</button>
+  </div>
+</div>
+
+<div id="toastContainer"></div>
+<button class="scroll-top" id="stBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<script src="assets/api.js"></script>
+<script>
+// ── State ──────────────────────────────────────────────────────
+var currentUser = null;
+var currentRole = 'customer';
+var currentCat  = 'all';
+var searchTimer = null;
+
+// ── Boot ───────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function () {
+    // Check existing session silently
+    API.session().then(function (res) {
+        if (res.success) {
+            currentUser = res.data;
+            renderNav(currentUser);
+            refreshCart();
+        }
+    });
+    loadProducts('all', '');
+    loadExoticFruits('all');
+    searchFarmers();
+
+    // Scroll top button
+    window.addEventListener('scroll', function () {
+        document.getElementById('stBtn').classList.toggle('vis', window.scrollY > 400);
+    });
+
+    // Search with debounce
+    document.getElementById('searchInput').addEventListener('input', function () {
+        clearTimeout(searchTimer);
+        var q = this.value.trim();
+        searchTimer = setTimeout(function () {
+            loadProducts(currentCat, q);
+        }, 400);
+    });
+});
+
+// ── Nav ────────────────────────────────────────────────────────
+function renderNav(user) {
+    var area  = document.getElementById('navAuth');
+    var pages = { customer: 'customer.html', farmer: 'farmer.html', admin: 'admin.html' };
+    if (user) {
+        area.innerHTML =
+            '<a href="' + (pages[user.role] || '#') + '" class="btn-dash">' +
+            user.name.split(' ')[0] + '\'s Dashboard</a>' +
+            '<button class="btn-login" onclick="doLogout()" style="margin-left:8px">Logout</button>';
+    } else {
+        area.innerHTML = '<button class="btn-login" onclick="openModal()">Login</button>';
+    }
+}
+
+async function doLogout() {
+    await API.logout();
+    currentUser = null;
+    renderNav(null);
+    renderCart([], 0);
+    showToast('Logged out successfully.');
+}
+
+// ── Modal ──────────────────────────────────────────────────────
+function openModal()  { document.getElementById('modalOv').classList.add('open'); }
+function closeModal() { document.getElementById('modalOv').classList.remove('open'); }
+function closeModalOut(e) { if (e.target.id === 'modalOv') closeModal(); }
+
+function switchTab(tab, btn) {
+    document.querySelectorAll('.mtab').forEach(function (t) { t.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('loginForm').style.display    = tab === 'login'    ? 'block' : 'none';
+    document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+}
+
+function pickRole(el) {
+    document.querySelectorAll('.rbtn').forEach(function (b) { b.classList.remove('active'); });
+    el.classList.add('active');
+    currentRole = el.getAttribute('data-role');
+}
+
+async function doLogin() {
+    var email = document.getElementById('lEmail').value.trim();
+    var pass  = document.getElementById('lPass').value;
+    if (!email || !pass) { showToast('Please enter email and password.', 'error'); return; }
+
+    var btn = document.getElementById('lBtn');
+    btn.disabled = true; btn.textContent = 'Logging in…';
+    var res = await API.login(email, pass);
+    btn.disabled = false; btn.textContent = 'Login to FarmConnect';
+
+    if (!res.success) { showToast(res.message, 'error'); return; }
+
+    currentUser = res.data;
+    closeModal();
+    showToast(res.message);
+    renderNav(currentUser);
+    refreshCart();
+
+    // Redirect to correct dashboard after 800ms
+    var pages = { customer: 'customer.html', farmer: 'farmer.html', admin: 'admin.html' };
+    setTimeout(function () {
+        if (pages[currentUser.role]) window.location.href = pages[currentUser.role];
+    }, 800);
+}
+
+async function doRegister() {
+    var name  = document.getElementById('rName').value.trim();
+    var email = document.getElementById('rEmail').value.trim();
+    var phone = document.getElementById('rPhone').value.trim();
+    var pass  = document.getElementById('rPass').value;
+
+    if (!name || !email || !pass) { showToast('Please fill in all required fields.', 'error'); return; }
+
+    var btn = document.getElementById('rBtn');
+    btn.disabled = true; btn.textContent = 'Creating Account…';
+    var res = await API.register({ name: name, email: email, phone: phone, password: pass, role: currentRole });
+    btn.disabled = false; btn.textContent = 'Create My Account';
+
+    if (!res.success) { showToast(res.message, 'error'); return; }
+
+    currentUser = res.data;
+    closeModal();
+    showToast(res.message);
+    renderNav(currentUser);
+
+    // Redirect customers and admins; farmers wait for approval
+    var pages = { customer: 'customer.html', admin: 'admin.html' };
+    if (pages[currentRole]) {
+        setTimeout(function () { window.location.href = pages[currentRole]; }, 800);
+    }
+}
+
+async function subscribeToPlan(plan) {
+    if (!currentUser) {
+        showToast('Please login to subscribe.', 'info');
+        openModal();
+        return;
+    }
+    if (currentUser.role !== 'customer') {
+        showToast('Only customers can subscribe.', 'error');
+        return;
+    }
+    
+    var res = await API.subscribe(plan);
+    if (res.success) {
+        showToast('✓ Subscription activated! ' + res.discount_pct + '% discount applied.', 'success');
+        refreshCart();
+    } else {
+        showToast(res.message || 'Subscription failed.', 'error');
+    }
+}
+
+// ── Products ───────────────────────────────────────────────────
+async function loadProducts(cat, search) {
+    var grid = document.getElementById('prodGrid');
+    grid.innerHTML = '<div class="loading-ph"><div class="spinner"></div><span>Loading products…</span></div>';
+
+    var params = {};
+    if (cat && cat !== 'all') params.category = cat;
+    if (search) params.search = search;
+
+    var res = await API.getProducts(params);
+
+    if (!res.success || !res.data || !res.data.length) {
+        grid.innerHTML = '<div class="loading-ph" style="color:#c62828">' +
+            (search ? 'No products found for "' + search + '"' : (res.message || 'No products available.')) +
+            '</div>';
+        return;
+    }
+
+    grid.innerHTML = res.data.map(function (p) { return productCard(p); }).join('');
+}
+
+function productCard(p) {
+    var imgHtml = p.image_url
+        ? '<img src="' + p.image_url + '" alt="' + p.name + '" onerror="this.style.display=\'none\'">'
+        : '<div class="pimg-ph"><svg width="38" height="38" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>No image</span></div>';
+
+    return '<div class="pcard">' +
+        '<div class="pimg">' + imgHtml + '<span class="pbadge" style="text-transform:capitalize">' + p.category + '</span></div>' +
+        '<div class="pinfo">' +
+        '<div class="pfarmer">👤 ' + p.farmer_name + '</div>' +
+        '<div class="pname">' + p.name + '</div>' +
+        '<div class="pmeta">' +
+        '<div><span class="pprice">₹' + parseFloat(p.price).toFixed(0) + '</span>' +
+        '<span class="punit"> / ' + p.unit + '</span></div>' +
+        '<span class="pcat">' + p.category + '</span>' +
+        '</div>' +
+        '<button class="btn-addcart" onclick="addToCart(' + p.id + ',\'' + p.name.replace(/'/g,'') + '\',this)">' +
+        '<svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>' +
+        '<line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Add to Cart' +
+        '</button></div></div>';
+}
+
+function filterCat(cat, section, btn) {
+    section = section || 'default';
+    
+    if (section === 'exotic') {
+        document.querySelectorAll('#exotic .ftab').forEach(function (t) { t.classList.remove('active'); });
+        btn.classList.add('active');
+        loadExoticFruits(cat);
+    } else {
+        document.querySelectorAll('#organic .ftab').forEach(function (t) { t.classList.remove('active'); });
+        btn.classList.add('active');
+        currentCat = cat;
+        loadProducts(cat, document.getElementById('searchInput').value.trim());
+    }
+}
+
+// ── Exotic Fruits ──────────────────────────────────────────────
+async function loadExoticFruits(cat) {
+    var grid = document.getElementById('exoticGrid');
+    grid.innerHTML = '<div class="loading-ph"><div class="spinner"></div><span>Loading exotic fruits…</span></div>';
+
+    var params = { is_exotic: 1 };
+    if (cat && cat !== 'all') params.category = cat;
+
+    var res = await API.getProducts(params);
+
+    if (!res.success || !res.data || !res.data.length) {
+        grid.innerHTML = '<div class="loading-ph" style="color:#c62828">No exotic fruits available at the moment.</div>';
+        return;
+    }
+
+    grid.innerHTML = res.data.map(function (p) { return productCard(p); }).join('');
+}
+
+// ── Farmers Directory ──────────────────────────────────────────
+async function searchFarmers(filter) {
+    var grid = document.getElementById('farmersGrid');
+    grid.innerHTML = '<div class="loading-ph"><div class="spinner"></div><span>Loading farmers…</span></div>';
+
+    var res = await API.getFarmers();
+
+    if (!res.success || !res.data || !res.data.length) {
+        grid.innerHTML = '<div class="loading-ph" style="color:#c62828">No farmers found.</div>';
+        return;
+    }
+
+    grid.innerHTML = res.data.map(function (farmer) { return farmerCard(farmer); }).join('');
+}
+
+function farmerCard(farmer) {
+    var certCount = farmer.certifications ? farmer.certifications.length : 0;
+    var hasCerts = certCount > 0;
+    return '<div class="fcard" onclick="window.location.href=\'farmer_profile.html?id=' + farmer.id + '\'">' +
+        '<div class="fcard-header">' +
+        '<div class="fcard-img">' + (farmer.profile_photo ? '<img src="' + farmer.profile_photo + '" alt="' + farmer.name + '" onerror="this.style.display=\'none\'">' : '') + '</div>' +
+        '</div>' +
+        '<div class="fcard-body">' +
+        '<div class="fcard-name">' + farmer.name + '</div>' +
+        '<div class="fcard-location">📍 ' + (farmer.location || 'Local Farm') + '</div>' +
+        '<div class="fcard-rating">⭐ 4.8 | Since ' + (farmer.established_year || '2020') + '</div>' +
+        '<div class="fcard-bio">' + (farmer.bio || farmer.name + ' is a dedicated farmer growing fresh, organic produce') + '</div>' +
+        '<div class="fcard-badges">' + (hasCerts ? '<span class="fbadge">✓ Certified</span>' : '') + '<span class="fbadge">Verified</span></div>' +
+        '<button class="fcard-btn" onclick="event.stopPropagation();window.location.href=\'farmer_profile.html?id=' + farmer.id + '\'">View Farm Profile →</button>' +
+        '</div></div>';
+}
+
+// ── Cart ───────────────────────────────────────────────────────
+async function addToCart(productId, name, btn) {
+    if (!currentUser) {
+        showToast('Please login to add items to cart.', 'info');
+        openModal();
+        return;
+    }
+    if (currentUser.role !== 'customer') {
+        showToast('Only customers can add items to cart.', 'error');
+        return;
+    }
+    btn.disabled = true; btn.textContent = 'Adding…';
+    var res = await API.addToCart(productId, 1);
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:white;fill:none;stroke-width:2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Add to Cart';
+
+    if (!res.success) { showToast(res.message, 'error'); return; }
+    showToast(name + ' added to cart! 🛒');
+    refreshCart();
+}
+
+async function refreshCart() {
+    if (!currentUser || currentUser.role !== 'customer') { renderCart([], 0); return; }
+    var res = await API.getCart();
+    if (res.success) renderCart(res.data.items, res.data.total);
+}
+
+function renderCart(items, total) {
+    var badge = document.getElementById('cartBadge');
+    var body  = document.getElementById('cartBody');
+    var ft    = document.getElementById('cartFt');
+    var count = 0;
+    items.forEach(function (i) { count += i.quantity; });
+    badge.textContent = count;
+
+    if (!items.length) {
+        body.innerHTML = '<div class="cart-empty">' +
+            '<svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>' +
+            '<line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>' +
+            '<p style="font-weight:600;margin-bottom:5px">Your cart is empty</p>' +
+            '<p style="font-size:.81rem">Add fresh produce to get started</p></div>';
+        ft.style.display = 'none';
+        return;
+    }
+
+    body.innerHTML = items.map(function (item) {
+        return '<div class="citem">' +
+            '<div class="citem-img">' +
+            (item.image_url
+                ? '<img src="' + item.image_url + '" alt="' + item.name + '">'
+                : '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>') +
+            '</div>' +
+            '<div class="citem-info">' +
+            '<div class="citem-name">' + item.name + '</div>' +
+            '<div class="citem-farmer">' + item.farmer_name + '</div>' +
+            '<div class="citem-row">' +
+            '<div class="qty">' +
+            '<button class="qbtn" onclick="removeItem(' + item.product_id + ')">−</button>' +
+            '<span class="qnum">' + item.quantity + '</span>' +
+            '<button class="qbtn" onclick="bumpItem(' + item.product_id + ')">+</button>' +
+            '</div>' +
+            '<span class="citem-price">₹' + parseFloat(item.subtotal).toFixed(0) + '</span>' +
+            '</div></div></div>';
+    }).join('');
+
+    document.getElementById('cartTot').textContent = '₹' + parseFloat(total).toFixed(2);
+    ft.style.display = 'block';
+}
+
+async function removeItem(pid) {
+    await API.removeFromCart(pid);
+    refreshCart();
+}
+
+async function bumpItem(pid) {
+    await API.addToCart(pid, 1);
+    refreshCart();
+}
+
+function toggleCart() { document.getElementById('cartDrawer').classList.toggle('open'); }
+
+async function doCheckout() {
+    var res = await API.placeOrder();
+    if (!res.success) { showToast(res.message, 'error'); return; }
+    toggleCart();
+    showToast('Order placed successfully! 🎉');
+    renderCart([], 0);
+}
+</script>
+</body>
+</html>
