@@ -51,11 +51,12 @@ if (!move_uploaded_file($cert_file['tmp_name'], $filepath)) {
 // Save to database
 $stmt = $db->prepare('
     INSERT INTO farmer_certifications (farmer_id, user_id, cert_name, cert_file, cert_type, is_verified)
-    VALUES (?, ?, ?, ?, ?, 0)
+    VALUES (?, ?, ?, ?, ?, ?)
 ');
 
 $cert_file_path = 'farmer_certs/' . $filename;
-$stmt->bind_param('iissi', $farmer_id, $farmer_id, $cert_name, $cert_file_path, $is_verified = 0);
+$is_verified = 0;
+$stmt->bind_param('iisssi', $farmer_id, $farmer_id, $cert_name, $cert_file_path, $cert_type, $is_verified);
 
 if (!$stmt->execute()) {
     unlink($filepath);

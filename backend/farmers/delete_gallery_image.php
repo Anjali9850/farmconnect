@@ -1,49 +1,53 @@
 <?php
-header('Content-Type: application/json');
-require_once '../config.php';
+// DELETE /backend/farmers/delete_gallery_image.php
+require_once __DIR__ . '/../config.php';
 
-session_start();
-
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'farmer') {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-    exit;
+if ($_SERVER['REQUEST_METHOD'] !== 'DELETE' && $_SERVER['REQUEST_METHOD'] !== 'POST') {
+    jsonError('Method not allowed.', 405);
 }
 
-$data = json_decode(file_get_contents('php://input'), true);
-$image_id = $data['image_id'] ?? null;
-$user_id = $_SESSION['user_id'];
+$user = requireRole('farmer');
+$farmer_id = $user['id'];
+
+$body = getBody();
+$image_id = (int)($body['image_id'] ?? 0);
 
 if (!$image_id) {
-    echo json_encode(['success' => false, 'message' => 'Image ID required']);
-    exit;
+    jsonError('image_id is required.');
 }
 
-// Get image and verify it belongs to user
-$stmt = $conn->prepare('SELECT image_url FROM farmer_gallery WHERE id = ? AND farmer_id = ?');
-$stmt->bind_param('ii', $image_id, $user_id);
+$db = getDB();
+
+// Get image and verify it belongs to farmer
+$stmt = $db->prepare('SELECT image_path FROM farmer_gallery WHERE id = ? AND farmer_id = ?');
+$stmt->bind_param('ii', $image_id, $farmer_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows === 0) {
-    echo json_encode(['success' => false, 'message' => 'Image not found']);
-    exit;
+    $stmt->close();
+    jsonError('Image not found or does not belong to you.', 404);
 }
 
 $image = $result->fetch_assoc();
+$image_path = $image['image_path'];
+$stmt->close();
 
 // Delete from database
-$stmt = $conn->prepare('DELETE FROM farmer_gallery WHERE id = ? AND farmer_id = ?');
-$stmt->bind_param('ii', $image_id, $user_id);
+$delete_stmt = $db->prepare('DELETE FROM farmer_gallery WHERE id = ? AND farmer_id = ?');
+$delete_stmt->bind_param('ii', $image_id, $farmer_id);
 
-if ($stmt->execute()) {
-    // Try to delete file if it exists
-    $filepath = str_replace('/farmconnect/backend/', '../', $image['image_url']);
-    if (file_exists($filepath)) {
-        unlink($filepath);
-    }
-    
-    echo json_encode(['success' => true, 'message' => 'Image deleted']);
-} else {
-    echo json_encode(['success' => false, 'message' => 'Failed to delete']);
+if (!$delete_stmt->execute()) {
+    jsonError('Failed to delete image from database.');
 }
-?>
+
+$delete_stmt->close();
+
+// Try to delete file
+$filepath = __DIR__ . '/../uploads/' . $image_path;
+if (file_exists($filepath)) {
+    unlink($filepath);
+}
+
+jsonSuccess(['id' => $image_id], 'Image deleted successfully');
+

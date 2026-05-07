@@ -89,22 +89,35 @@ const API = (function () {
         getFarmerProfile: function (id)       { return request('/farmers/get_profile.php?id=' + id); },
         updateFarmerProfile: function (data) { return request('/farmers/update_profile.php', 'POST', data); },
         addCertificate: function (formData)  { return request('/farmers/add_certificate.php', 'POST', formData, true); },
+        verifyCertificate: function (certId, isVerified) { return request('/farmers/verify_certificate.php', 'POST', { cert_id: certId, is_verified: isVerified }); },
         addFarmPractice: function (data)     { return request('/farmers/add_practice.php', 'POST', data); },
         deleteGalleryImage: function (imgId) { return request('/farmers/delete_gallery_image.php', 'POST', { image_id: imgId }); },
         uploadGalleryImages: function (formData) { return request('/farmers/upload_gallery.php', 'POST', formData, true); },
+        addFarmerReview: function (farmerId, rating, reviewText) { return request('/farmers/add_review.php', 'POST', { farmer_id: farmerId, rating: rating, review_text: reviewText }); },
 
         // ── Subscriptions ─────────────────────────────────────
-        subscribe:  function (plan)     { return request('/subscriptions/subscribe.php', 'POST', { plan: plan }); },
-        getPlan:    function ()         { return request('/subscriptions/get_plan.php'); },
+        subscribe:  function (planType)   { return request('/subscriptions/subscribe.php', 'POST', { plan_type: planType }); },
+        getPlan:    function ()           { return request('/subscriptions/get_plan.php'); },
 
         // ── Notifications ─────────────────────────────────────
-        getNotifications: function ()   { return request('/notifications/get.php'); },
+        getNotifications: function (limit, offset) { 
+            var qs = '?limit=' + (limit || 20) + '&offset=' + (offset || 0);
+            return request('/notifications/get.php' + qs); 
+        },
         markNotificationRead: function (nid) { return request('/notifications/mark_read.php', 'POST', { notification_id: nid }); },
         markAllNotificationsRead: function () { return request('/notifications/mark_read.php', 'POST', { mark_all: true }); },
 
+        // ── Wishlist ──────────────────────────────────────────
+        addToWishlist: function (productId) { return request('/orders/wishlist.php', 'POST', { product_id: productId }); },
+        removeFromWishlist: function (productId) { return request('/orders/wishlist.php', 'DELETE', { product_id: productId }); },
+        getWishlist: function () { return request('/orders/wishlist.php'); },
+
         // ── Admin ─────────────────────────────────────────────
         getUsers:   function ()              { return request('/auth/admin_users.php'); },
-        manageUser: function (uid, action)   { return request('/auth/admin_users.php', 'POST', { user_id: uid, action: action }); }
+        manageUser: function (uid, action)   { return request('/auth/admin_users.php', 'POST', { user_id: uid, action: action }); },
+        approveFarmer: function (farmerId) { return request('/auth/admin_users.php', 'POST', { user_id: farmerId, action: 'approve' }); },
+        rejectFarmer: function (farmerId) { return request('/auth/admin_users.php', 'POST', { user_id: farmerId, action: 'reject' }); },
+        getPendingFarmers: function () { return request('/auth/admin_users.php?role=farmer&approved=0'); }
     };
 }());
 
